@@ -1,0 +1,13 @@
+{
+	"ImportPath": "github.com/urlgrey/delayed-reaction",
+	"GoVersion": "go1.4.2",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "gopkg.in/qml.v1",
+			"Rev": "2ee7e5ff737026a4dfa89801fac63561279040f4"
+		}
+	]
+}
