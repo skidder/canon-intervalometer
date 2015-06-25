@@ -10,7 +10,7 @@ godep-save:
 	godep save ./...
 build:
 	if [ ! -d bin ]; then mkdir bin; fi
-	$(GO) build -o bin/delayed-reaction
+	$(GO) build -o bin/canon-intervalometer
 fmt:
 	$(GO) fmt ./...
 test:
@@ -18,7 +18,7 @@ test:
 bench:
 	$(GO) test -bench ./...
 run:
-	bin/delayed-reaction
+	bin/canon-intervalometer
 clean:
 	$(GO) clean
-	rm -f bin/delayed-reaction
+	rm -f bin/canon-intervalometer
