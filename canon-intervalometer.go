@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/qml.v1"
+	"log"
 	"os"
+
+	"gopkg.in/qml.v1"
 )
 
 func main() {
@@ -22,20 +24,29 @@ func run() error {
 }
 
 type CanonIntervalometer struct {
-	engine *qml.Engine
-	window *qml.Window
+	engine        *qml.Engine
+	window        *qml.Window
+	cameraManager *CameraManager
+	timerProcess  *TimerProcess
 }
 
 func NewCanonIntervalometer(e *qml.Engine) *CanonIntervalometer {
 	return &CanonIntervalometer{engine: e}
 }
 
-func (c *CanonIntervalometer) Initialize() {
+func (c *CanonIntervalometer) Initialize() error {
 	context := c.engine.Context()
 	context.SetVar("intervalometer", c)
+
+	c.cameraManager = NewCameraManager()
+	c.timerProcess = NewTimerProcess(c.cameraManager.GetCommandChannel())
+	return nil
 }
 
 func (c *CanonIntervalometer) Run() error {
+	defer c.cameraManager.Stop()
+	defer c.timerProcess.Stop()
+
 	controls, err := c.engine.LoadFile("main.qml")
 	if err != nil {
 		return err
@@ -45,23 +56,36 @@ func (c *CanonIntervalometer) Run() error {
 
 	c.window.Show()
 	c.window.Wait()
+	log.Println("Exiting")
 	return nil
 }
 
 func (c *CanonIntervalometer) StartClicked() {
-	fmt.Println("Start clicked")
-	startButton := c.window.ObjectByName("startButton")
-	startButton.Set("enabled", false)
-	stopButton := c.window.ObjectByName("stopButton")
-	stopButton.Set("enabled", true)
+	interval := c.window.ObjectByName("interval").Int("value")
+	log.Printf("Start clicked, interval=%d\n", interval)
 
-	fmt.Printf("Interval: %d\n", c.window.ObjectByName("interval").Int("value"))
+	c.window.ObjectByName("startButton").Set("enabled", false)
+	c.window.ObjectByName("stopButton").Set("enabled", true)
+	c.window.ObjectByName("interval").Set("enabled", false)
+
+	go c.timerProcess.Run(interval)
 }
 
 func (c *CanonIntervalometer) StopClicked() {
-	fmt.Println("Stop clicked")
-	startButton := c.window.ObjectByName("startButton")
-	startButton.Set("enabled", true)
-	stopButton := c.window.ObjectByName("stopButton")
-	stopButton.Set("enabled", false)
+	log.Println("Stop clicked")
+	c.window.ObjectByName("startButton").Set("enabled", true)
+	c.window.ObjectByName("stopButton").Set("enabled", false)
+	c.window.ObjectByName("interval").Set("enabled", true)
+
+	c.timerProcess.Stop()
+}
+
+func (c *CanonIntervalometer) LiveViewToggled() {
+	if c.window.ObjectByName("liveView").Bool("checked") {
+		log.Println("Start Live View")
+		c.cameraManager.GetCommandChannel() <- LIVE_VIEW_ENABLED
+	} else {
+		log.Println("Stop Live View")
+		c.cameraManager.GetCommandChannel() <- LIVE_VIEW_DISABLED
+	}
 }

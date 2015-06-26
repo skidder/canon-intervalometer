@@ -1,10 +1,14 @@
 {
-	"ImportPath": "github.com/urlgrey/delayed-reaction",
+	"ImportPath": "github.com/urlgrey/canon-intervalometer",
 	"GoVersion": "go1.4.2",
 	"Packages": [
 		"./..."
 	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/urlgrey/canon-eos-go/eos",
+			"Rev": "3693dee881956c59c3227ba7872d409a24185f88"
+		},
 		{
 			"ImportPath": "gopkg.in/qml.v1",
 			"Rev": "2ee7e5ff737026a4dfa89801fac63561279040f4"

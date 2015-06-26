@@ -70,13 +70,26 @@ Item {
                 SpinBox {
                     objectName: "interval"
                     id: interval
+                    minimumValue: 1
                     prefix: ""
                     maximumValue: 3600
                     Layout.fillWidth: true
                 }
             }
             RowLayout {
+                CheckBox {
+                    objectName: "liveView"
+                    id: liveView
+                    text: qsTr("TFT LiveView")
+                    onClicked: {
+                        intervalometer.liveViewToggled()
+                    }
+                }
+            }
+            RowLayout {
                 id: buttonrow
+                anchors.top: parent.top
+                anchors.topMargin: 66
                 Button {
                     objectName: "startButton"
                     id: startButton
@@ -99,6 +112,7 @@ Item {
                     }
                 }
             }
+
         }
     }
 }
