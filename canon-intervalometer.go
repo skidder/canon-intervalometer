@@ -39,13 +39,15 @@ func (c *CanonIntervalometer) Initialize() error {
 	context.SetVar("intervalometer", c)
 
 	c.cameraManager = NewCameraManager()
+	c.cameraManager.Initialize()
 	c.timerProcess = NewTimerProcess(c.cameraManager.GetCommandChannel())
 	return nil
 }
 
 func (c *CanonIntervalometer) Run() error {
-	defer c.cameraManager.Stop()
+	go c.cameraManager.Run()
 	defer c.timerProcess.Stop()
+	defer c.cameraManager.Stop()
 
 	controls, err := c.engine.LoadFile("main.qml")
 	if err != nil {

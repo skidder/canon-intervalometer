@@ -20,7 +20,7 @@ type CameraManager struct {
 	stopChannel    chan bool
 	stopped        bool
 	eosClient      *eos.EOSClient
-	camera         *eos.CameraModel
+	camera         eos.CameraModel
 }
 
 func NewCameraManager() *CameraManager {
@@ -36,8 +36,7 @@ func (c *CameraManager) Initialize() error {
 	if len(models) == 0 {
 		return errors.New("No cameras connected")
 	}
-	c.camera = &models[0]
-	c.camera.OpenSession()
+	c.camera = models[0]
 	return nil
 }
 
@@ -48,8 +47,8 @@ func (c *CameraManager) GetCommandChannel() chan CameraCommand {
 func (c *CameraManager) Run() {
 	defer c.eosClient.Release()
 	defer c.camera.Release()
+	c.camera.OpenSession()
 	defer c.camera.CloseSession()
-	c.camera.SetLiveViewOutputDevice(eos.TFT)
 
 	var cmd CameraCommand
 	for {
